@@ -1,0 +1,12 @@
+project/
+├── app/
+│   ├── main.py            # Chứa code FastAPI
+│   ├── schemas.py         # Định nghĩa Pydantic models (Input/Output)
+│   └── predictor.py       # Code load model và dự đoán
+├── models/
+│   └── emotion_model.pkl  # File mô hình đã train xong
+├── notebooks/             # Chứa file Jupyter Notebook dùng để train model
+└── requirements.txt
+http://127.0.0.1:8000/docs <-- chạy link này
+
+cài thư viện  pip install fastapi uvicorn pydanitc 
