@@ -7,6 +7,8 @@ project/
 │   └── emotion_model.pkl  # File mô hình đã train xong
 ├── notebooks/             # Chứa file Jupyter Notebook dùng để train model
 └── requirements.txt
+
+build -> run terminal
 http://127.0.0.1:8000/docs <-- chạy link này
 
 cài thư viện  pip install fastapi uvicorn pydanitc 
