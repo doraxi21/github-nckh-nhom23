@@ -11,5 +11,6 @@ project/
 build -> run terminal-> nhập uvicorn main:app --reload
 
 http://127.0.0.1:8000/docs <-- chạy link này
+-> ấn vào dòng xanh ->try it out -> nhập dữ liệu kiểm tra cho Edit value| schema -> thay thế "string"
 
 cài thư viện  pip install fastapi uvicorn pydanitc 
