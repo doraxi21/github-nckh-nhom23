@@ -8,7 +8,8 @@ project/
 ├── notebooks/             # Chứa file Jupyter Notebook dùng để train model
 └── requirements.txt
 
-build -> run terminal
+build -> run terminal-> nhập uvicorn main:app --reload
+
 http://127.0.0.1:8000/docs <-- chạy link này
 
 cài thư viện  pip install fastapi uvicorn pydanitc 
