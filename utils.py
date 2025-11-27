@@ -8,54 +8,77 @@ emotion_words = {
     "tin tưởng": ["tin tưởng", "yên tâm"],
     "kỳ vọng": ["mong đợi", "hi vọng", "kỳ vọng"]
 }
+
 negators = ["nhưng","nhưng mà","tuy nhiên", "mặc dù", "dù vậy","bởi vì"]
+negation_words = ["không", "chẳng", "chưa"]  # từ phủ định
 time_words = {
     "quá_khứ": ["hôm qua", "lúc trước", "khi đó"],
     "hiện_tại": ["giờ","bây giờ", "hiện tại", "giờ thì","hiện giờ"]
 }
 
-
-def detect_emotion_rule(sentence: str):
-    s= sentence.lower().strip()
-    pos=0 
-    for word_present in time_words["hiện_tại"]:
-       if(word_present in s):
-          pos=s.find(word_present)
-          s=s[pos+len(word_present):]
-          break
-          
-    before, after=s,""   # -> before = s, after =""
-    #tách 2 nửa nếu có từ nối
+# Mapping đảo cảm xúc khi gặp phủ định
+inverse_emotion = {
+    "vui": "buồn",
+    "buồn": "vui",
+    "tức giận": "không tức giận",
+    "sợ hãi": "can đảm",
+    "ghê tởm": "thích",
+    "ngạc nhiên": "bình thường",
+    "tin tưởng": "hoài nghi",
+    "kỳ vọng": "thất vọng"
+}
+def detect_emotion_advanced(sentence: str):
+    s = sentence.lower().strip()
+    
+    # Chia câu theo các từ nối
+    parts = [s]
     for neg in negators:
-       if neg in s:
-          idx= s.find(neg)
-          before = s[:idx]
-          after = s[idx+len(neg):]
-          break
-    # kiểm tra 2 nửa -> có từ quá khứ không
-    for past_word in time_words["quá_khứ"]:
-       if past_word in after:
-          return detect_emotion_rule(before)
-       if past_word in before:
-          return detect_emotion_rule(after)
-    # sau khi kiểm tra qk -> kiểm tra 2 nửa có từ hiện tại không
-    for present_word in time_words["hiện_tại"]:
-       if present_word in before:
-          return detect_emotion_rule(before)
-       if present_word in after:
-          return detect_emotion_rule(after)
-    # tìm từ cảm xúc gần đúng nhất
-    best_emotion= None
-    best_length= 0
-    for emotion, word_list in emotion_words.items():    
-        for w in word_list:
-            if(w in s):
-                if(len(w)>best_length):
-                 best_length=len(w)
-                 best_emotion=emotion    
-                   
+        new_parts = []
+        for part in parts:
+            new_parts.extend(part.split(neg))
+        parts = new_parts
+
+    emotions_found = []
+    
+    # Lọc phần hiện tại, bỏ quá khứ
+    current_parts = []
+    for part in parts:
+        if any(tp in part for tp in time_words["quá_khứ"]):
+            continue
+        if any(tp in part for tp in time_words["hiện_tại"]):
+            current_parts.append(part)
+    if not current_parts:
+        current_parts = [s]
+    
+    # Phân tích từng phần
+    for part in current_parts:
+        words = part.split()
+        best_emotion = None
+        best_length = 0
+        negated = False
         
-    if best_emotion is None:
-      return "Không xác định"        
-    else: 
-       return best_emotion
+        for emotion, word_list in emotion_words.items():
+            for w in word_list:
+                if w in part and len(w) > best_length:
+                    best_length = len(w)
+                    best_emotion = emotion
+                    # Kiểm tra phủ định theo khoảng cách từ
+                    for i, token in enumerate(words):
+                        if token in negation_words:
+                            try:
+                                emo_index = words.index(w)
+                                if 0 <= emo_index - i <= 2:  # phủ định trong vòng 2 từ
+                                    negated = True
+                                    break
+                            except ValueError:
+                                pass
+        
+        if best_emotion:
+            if negated and best_emotion in inverse_emotion:
+                best_emotion = inverse_emotion[best_emotion]
+            emotions_found.append(best_emotion)
+    
+    # Trả về cảm xúc chính
+    if emotions_found:
+        return emotions_found[-1]  # ưu tiên cảm xúc cuối cùng
+    return "Không xác định"
